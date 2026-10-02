@@ -18,7 +18,7 @@ public class Pokemon
 
         //GENÈRE LES MOVES
         Moves = new List<Move>();
-        foreach(var move in Base.LearnableMoves)
+        foreach(LearnableMove move in Base.LearnableMoves)
         {
             if (move.Level <= Level)
                 Moves.Add(new Move(move.Base));
