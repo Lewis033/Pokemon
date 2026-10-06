@@ -43,7 +43,6 @@ public class BattleSystem : MonoBehaviour
         dialogBox.SetMoveNames(playerUnit.Pokemon.Moves);
 
         yield return dialogBox.TypeDialog($"Un {enemyUnit.Pokemon.Base.PokemonName} sauvage apparait!");
-        yield return new WaitForSeconds(1f);
 
         PlayerAction();
     }
@@ -76,12 +75,11 @@ public class BattleSystem : MonoBehaviour
         Move move = playerUnit.Pokemon.Moves[currentMove];
         yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
 
-        yield return new WaitForSeconds(1f);
-
-        bool isFainted = enemyUnit.Pokemon.TakeDamage(move, playerUnit.Pokemon);
+        DamageDetails damageDetails = enemyUnit.Pokemon.TakeDamage(move, playerUnit.Pokemon);
         yield return enemyHud.UpdateHP();
+        yield return ShowDamageDetails(damageDetails);
 
-        if (isFainted)
+        if (damageDetails.Fainted)
         {
             yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} est KO.");
         }
@@ -99,12 +97,11 @@ public class BattleSystem : MonoBehaviour
 
         yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
 
-        yield return new WaitForSeconds(1f);
-
-        bool isFainted = playerUnit.Pokemon.TakeDamage(move, enemyUnit.Pokemon);
+        DamageDetails damageDetails = playerUnit.Pokemon.TakeDamage(move, enemyUnit.Pokemon);
         yield return playerHud.UpdateHP();
+        yield return ShowDamageDetails(damageDetails);
 
-        if (isFainted)
+        if (damageDetails.Fainted)
         {
             yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} est KO.");
         }
@@ -112,6 +109,26 @@ public class BattleSystem : MonoBehaviour
         {
             PlayerAction();
         }
+    }
+
+    IEnumerator ShowDamageDetails(DamageDetails damageDetails)
+    {
+        if (damageDetails.Critical > 1f)
+        {
+            yield return dialogBox.TypeDialog("C'est un coup critique!");
+        }
+
+        if (damageDetails.TypeEffectiveness > 1f)
+        {
+
+            yield return dialogBox.TypeDialog("C'est super efficace!");
+        }
+
+        else if (damageDetails.TypeEffectiveness < 1f)
+        {
+            yield return dialogBox.TypeDialog("Ce n'est pas très efficace...");
+        }
+            
     }
 
     void HandleActionSelection()
