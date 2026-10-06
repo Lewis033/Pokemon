@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public enum BattleState { Start, PlayerAction, PlayerMove, EnnemyMove, Busy }
+public enum BattleState { Start, PlayerAction, PlayerMove, EnemyMove, Busy }
 
 public class BattleSystem : MonoBehaviour
 {
@@ -42,7 +42,7 @@ public class BattleSystem : MonoBehaviour
 
         dialogBox.SetMoveNames(playerUnit.Pokemon.Moves);
 
-        yield return dialogBox.TypeDialog($"Un {enemyUnit.Pokemon.Base.PokemonName} sauvage apparait");
+        yield return dialogBox.TypeDialog($"Un {enemyUnit.Pokemon.Base.PokemonName} sauvage apparait!");
         yield return new WaitForSeconds(1f);
 
         PlayerAction();
@@ -50,9 +50,15 @@ public class BattleSystem : MonoBehaviour
 
     void PlayerAction()
     {
-        state = BattleState.PlayerAction;
-        StartCoroutine(dialogBox.TypeDialog("Choisir une action"));
+        StartCoroutine(PlayerActionRoutine());
+    }
+
+    IEnumerator PlayerActionRoutine()
+    {
+        state = BattleState.Busy;
+        yield return dialogBox.TypeDialog("Choisir une action");
         dialogBox.EnableActionSelector(true);
+        state = BattleState.PlayerAction;
     }
 
     void PlayerMove()
@@ -61,6 +67,51 @@ public class BattleSystem : MonoBehaviour
         dialogBox.EnableActionSelector(false);
         dialogBox.EnableDialogText(false);
         dialogBox.EnableMoveSelector(true);
+    }
+
+    IEnumerator PerformPlayerMove()
+    {
+        state = BattleState.Busy;
+
+        Move move = playerUnit.Pokemon.Moves[currentMove];
+        yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
+
+        yield return new WaitForSeconds(1f);
+
+        bool isFainted = enemyUnit.Pokemon.TakeDamage(move, playerUnit.Pokemon);
+        yield return enemyHud.UpdateHP();
+
+        if (isFainted)
+        {
+            yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} est KO.");
+        }
+        else
+        {
+            StartCoroutine(EnemyMove());
+        }
+    }
+
+    IEnumerator EnemyMove()
+    {
+        state = BattleState.EnemyMove;
+
+        Move move = enemyUnit.Pokemon.GetRandomMove();
+
+        yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
+
+        yield return new WaitForSeconds(1f);
+
+        bool isFainted = playerUnit.Pokemon.TakeDamage(move, enemyUnit.Pokemon);
+        yield return playerHud.UpdateHP();
+
+        if (isFainted)
+        {
+            yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} est KO.");
+        }
+        else
+        {
+            PlayerAction();
+        }
     }
 
     void HandleActionSelection()
@@ -116,5 +167,12 @@ public class BattleSystem : MonoBehaviour
         }
 
         dialogBox.UpdateMoveSelection(currentMove, playerUnit.Pokemon.Moves[currentMove]);
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            dialogBox.EnableMoveSelector(false);
+            dialogBox.EnableDialogText(true);
+            StartCoroutine(PerformPlayerMove());
+        }
     }
 }
