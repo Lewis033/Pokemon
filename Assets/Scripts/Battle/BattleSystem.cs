@@ -75,6 +75,11 @@ public class BattleSystem : MonoBehaviour
         Move move = playerUnit.Pokemon.Moves[currentMove];
         yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
 
+        playerUnit.PlayAttackAnimation();
+        yield return new WaitForSeconds(1f);
+
+        enemyUnit.PlayHitAnimation();
+
         DamageDetails damageDetails = enemyUnit.Pokemon.TakeDamage(move, playerUnit.Pokemon);
         yield return enemyHud.UpdateHP();
         yield return ShowDamageDetails(damageDetails);
@@ -82,6 +87,7 @@ public class BattleSystem : MonoBehaviour
         if (damageDetails.Fainted)
         {
             yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} est KO.");
+            enemyUnit.PlayFaintAnimation();
         }
         else
         {
@@ -94,8 +100,12 @@ public class BattleSystem : MonoBehaviour
         state = BattleState.EnemyMove;
 
         Move move = enemyUnit.Pokemon.GetRandomMove();
-
         yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
+
+        enemyUnit.PlayAttackAnimation();
+        yield return new WaitForSeconds(1f);
+
+        playerUnit.PlayHitAnimation();
 
         DamageDetails damageDetails = playerUnit.Pokemon.TakeDamage(move, enemyUnit.Pokemon);
         yield return playerHud.UpdateHP();
@@ -104,6 +114,7 @@ public class BattleSystem : MonoBehaviour
         if (damageDetails.Fainted)
         {
             yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} est KO.");
+            playerUnit.PlayFaintAnimation();
         }
         else
         {
