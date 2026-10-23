@@ -12,6 +12,8 @@ public class PlayerController : MonoBehaviour
 
     public event Action OnEncountered;
 
+    public Vector2 feetOffset = new Vector2(0f, -0.3f);
+
     private bool isMoving;
     private Vector2 input;
 
@@ -77,7 +79,9 @@ public class PlayerController : MonoBehaviour
 
     private bool IsWalkable(Vector3 targetPos)
     {
-        if (Physics2D.OverlapCircle(targetPos, 0.2f, solidObjectsLayer) != null)
+        Vector2 feetTarget = (Vector2)targetPos + feetOffset;
+
+        if (Physics2D.OverlapCircle(feetTarget, 0.1f, solidObjectsLayer) != null)
         {
             return false;
         }
@@ -87,12 +91,14 @@ public class PlayerController : MonoBehaviour
 
     private void CheckForEncounters()
     {
-        if (Physics2D.OverlapCircle(transform.position, 0.2f, grassLayer) != null)
+        Vector2 feetPos = (Vector2)transform.position + feetOffset;
+
+        if (Physics2D.OverlapCircle(feetPos, 0.2f, grassLayer) != null)
         {
             if (UnityEngine.Random.Range(1, 101) <= 10)
             {
                 animator.SetBool("isMoving", false);
-                OnEncountered();
+                OnEncountered?.Invoke();
             }
         }
     }

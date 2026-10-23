@@ -92,7 +92,7 @@ public class BattleSystem : MonoBehaviour
             enemyUnit.PlayFaintAnimation();
 
             yield return new WaitForSeconds(2f);
-            OnBattleOver(true);
+            OnBattleOver?.Invoke(true);
         }
         else
         {
@@ -122,7 +122,7 @@ public class BattleSystem : MonoBehaviour
             playerUnit.PlayFaintAnimation();
 
             yield return new WaitForSeconds(2f);
-            OnBattleOver(false);
+            OnBattleOver?.Invoke(false);
         }
         else
         {
@@ -175,8 +175,20 @@ public class BattleSystem : MonoBehaviour
             else if (currentAction == 1)
             {
                 // Fuite
+                StartCoroutine(RunAway());
             }
         }
+    }
+
+    IEnumerator RunAway()
+    {
+        state = BattleState.Busy;
+        dialogBox.EnableActionSelector(false);
+
+        yield return dialogBox.TypeDialog("Vous prenez la fuite!");
+        yield return new WaitForSeconds(1f);
+
+        OnBattleOver?.Invoke(false);
     }
 
     void HandleMoveSelection()
