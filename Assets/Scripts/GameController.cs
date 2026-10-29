@@ -12,10 +12,7 @@ public class GameController : MonoBehaviour
     [SerializeField] BattleSystem battleSystem;
     [SerializeField] Camera worldCamera;
     [SerializeField] PokemonParty playerParty;
-
-    // Temporaire : Pokémon sauvage fixe (sera remplacé par les hautes herbes)
-    [SerializeField] PokemonBase wildBase;
-    [SerializeField] int wildLevel = 5;
+    [SerializeField] MapArea mapArea;
 
     GameState state;
 
@@ -31,7 +28,7 @@ public class GameController : MonoBehaviour
         battleSystem.gameObject.SetActive(true);
         worldCamera.gameObject.SetActive(false);
 
-        Pokemon wildPokemon = new Pokemon(wildBase, wildLevel);
+        Pokemon wildPokemon = mapArea.GetRandomWildPokemon();
         battleSystem.StartBattle(playerParty.GetHealthyPokemon(), wildPokemon);
     }
 
