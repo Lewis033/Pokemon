@@ -88,6 +88,11 @@ public class Pokemon
         return damageDetails;
     }
 
+    public void Heal()
+    {
+        HP = MaxHp;
+    }
+
     public Move GetRandomMove()
     {
         int r = Random.Range(0, Moves.Count);
