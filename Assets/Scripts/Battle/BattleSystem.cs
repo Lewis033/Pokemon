@@ -42,6 +42,9 @@ public class BattleSystem : MonoBehaviour
 
     public IEnumerator SetupBattle()
     {
+        currentAction = 0;
+        currentMove = 0;
+
         playerUnit.Setup(playerPokemon);
         enemyUnit.Setup(wildPokemon);
         playerHud.SetData(playerUnit.Pokemon);
@@ -80,6 +83,8 @@ public class BattleSystem : MonoBehaviour
         state = BattleState.Busy;
 
         Move move = playerUnit.Pokemon.Moves[currentMove];
+        move.PP--;
+
         yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
 
         playerUnit.PlayAttackAnimation();
@@ -110,6 +115,8 @@ public class BattleSystem : MonoBehaviour
         state = BattleState.EnemyMove;
 
         Move move = enemyUnit.Pokemon.GetRandomMove();
+        move.PP = Mathf.Max(0, move.PP - 1);
+
         yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} utilise {move.Base.MoveName}!");
 
         enemyUnit.PlayAttackAnimation();
@@ -223,9 +230,19 @@ public class BattleSystem : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Z))
         {
+            Move selectedMove = playerUnit.Pokemon.Moves[currentMove];
+            if (selectedMove.PP == 0)
+                return;
+
             dialogBox.EnableMoveSelector(false);
             dialogBox.EnableDialogText(true);
             StartCoroutine(PerformPlayerMove());
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            dialogBox.EnableMoveSelector(false);
+            dialogBox.EnableDialogText(true);
+            PlayerAction();
         }
     }
 }

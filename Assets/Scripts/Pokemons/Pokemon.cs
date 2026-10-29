@@ -91,12 +91,19 @@ public class Pokemon
     public void Heal()
     {
         HP = MaxHp;
+        foreach (Move m in Moves)
+            m.PP = m.Base.PP;
     }
 
     public Move GetRandomMove()
     {
-        int r = Random.Range(0, Moves.Count);
-        return Moves[r];
+        List<Move> usableMoves = Moves.FindAll(m => m.PP > 0);
+
+        if (usableMoves.Count == 0)
+            usableMoves = Moves;
+
+        int r = Random.Range(0, usableMoves.Count);
+        return usableMoves[r];
     }
 }
 
