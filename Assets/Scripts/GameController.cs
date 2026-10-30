@@ -29,7 +29,7 @@ public class GameController : MonoBehaviour
         worldCamera.gameObject.SetActive(false);
 
         Pokemon wildPokemon = mapArea.GetRandomWildPokemon();
-        battleSystem.StartBattle(playerParty.GetHealthyPokemon(), wildPokemon);
+        battleSystem.StartBattle(playerParty, wildPokemon);
     }
 
     void EndBattle(bool won)
