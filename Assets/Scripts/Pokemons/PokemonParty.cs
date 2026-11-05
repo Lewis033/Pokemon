@@ -5,12 +5,12 @@ public class PokemonParty : MonoBehaviour
 {
     [SerializeField] List<PokemonData> initialPokemons;
 
-    public List<Pokemon> Pokemons { get; private set; } = new List<Pokemon>();
+    public List<Pokemon> Pokemons { get; private set; }
 
     void Start()
     {
         Pokemons = new List<Pokemon>();
-        foreach (var pData in initialPokemons)
+        foreach (PokemonData pData in initialPokemons)
         {
             Pokemons.Add(new Pokemon(pData.pokemonBase, pData.level));
         }
