@@ -29,13 +29,36 @@ public class BattleDialogBox : MonoBehaviour
     public IEnumerator TypeDialog(string dialog)
     {
         dialogText.text = "";
-        foreach (char letter in dialog.ToCharArray())
+        float timer = 0f;
+        int shown = 0;
+
+        while (shown < dialog.Length)
         {
-            dialogText.text += letter;
-            yield return new WaitForSeconds(1f / letterPerSecond);
+            yield return null;
+
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                shown = dialog.Length;
+            }
+            else
+            {
+                timer += Time.deltaTime;
+                shown = Mathf.Min(dialog.Length, Mathf.FloorToInt(timer * letterPerSecond));
+            }
+
+            dialogText.text = dialog.Substring(0, shown);
         }
 
-        yield return new WaitForSeconds(1f);
+        float wait = 0f;
+        while (wait < 1f)
+        {
+            yield return null;
+
+            if (Input.GetKeyDown(KeyCode.Z))
+                break;
+
+            wait += Time.deltaTime;
+        }
     }
 
     public void EnableDialogText(bool enabled)
