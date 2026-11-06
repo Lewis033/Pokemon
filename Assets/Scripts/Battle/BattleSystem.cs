@@ -319,7 +319,7 @@ public class BattleSystem : MonoBehaviour
             }
             if (selectedMember == playerUnit.Pokemon)
             {
-                partyScreen.SetMessageText("Vous ne pouvez pas changé avec le même Pokémon");
+                partyScreen.SetMessageText("Vous ne pouvez pas changer avec le même Pokémon");
                 return;
             }
 
@@ -329,12 +329,19 @@ public class BattleSystem : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.X))
         {
+            if (playerUnit.Pokemon.HP <= 0)
+            {
+                partyScreen.SetMessageText("Vous devez choisir un Pokémon pour continuer");
+                return;
+            }
             partyScreen.gameObject.SetActive(false);
             PlayerAction();
         }
     }
     IEnumerator SwitchPokemon(Pokemon newPokemon)
     {
+        bool wasFainted = playerUnit.Pokemon.HP <= 0;
+
         if (playerUnit.Pokemon.HP > 0)
         {
             yield return dialogBox.TypeDialog($"{playerUnit.Pokemon.Base.PokemonName}, reviens !");
@@ -348,6 +355,9 @@ public class BattleSystem : MonoBehaviour
 
         yield return dialogBox.TypeDialog($"Va ! {newPokemon.Base.PokemonName} !");
 
-        StartCoroutine(EnemyMove());
+        if (wasFainted)
+            PlayerAction();
+        else
+            StartCoroutine(EnemyMove());
     }
 }
