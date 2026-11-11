@@ -7,6 +7,8 @@ public class PokemonParty : MonoBehaviour
 
     public List<Pokemon> Pokemons { get; private set; }
 
+    public List<Pokemon> Storage { get; private set; } = new List<Pokemon>();
+
     void Start()
     {
         Pokemons = new List<Pokemon>();
@@ -21,16 +23,19 @@ public class PokemonParty : MonoBehaviour
         return Pokemons.Find(p => p.HP > 0);
     }
 
-    public void AddPokemon(Pokemon newPokemon)
+    public bool AddPokemon(Pokemon newPokemon)
     {
         if (Pokemons.Count < 6)
         {
             Pokemons.Add(newPokemon);
             Debug.Log($"{newPokemon.Base.PokemonName} a été ajouté à l'équipe !");
+            return true;
         }
         else
         {
-            Debug.Log("L'équipe est pleine !");
+            Storage.Add(newPokemon);
+            Debug.Log($"L'équipe est pleine : {newPokemon.Base.PokemonName} va au stockage ({Storage.Count})");
+            return false;
         }
     }
 }

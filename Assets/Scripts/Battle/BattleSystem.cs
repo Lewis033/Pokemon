@@ -219,7 +219,7 @@ public class BattleSystem : MonoBehaviour
             else if (currentAction == 1)
             {
                 // Sac
-                
+                StartCoroutine(ThrowPokeball());
             }
             else if (currentAction == 2)
             {
@@ -243,6 +243,40 @@ public class BattleSystem : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         OnBattleOver?.Invoke(false);
+    }
+
+    IEnumerator ThrowPokeball()
+    {
+        state = BattleState.Busy;
+        dialogBox.EnableActionSelector(false);
+
+        Pokemon wild = enemyUnit.Pokemon;
+
+        yield return dialogBox.TypeDialog("Vous lancez une Pokéball!");
+
+        if (TryCatch(wild))
+        {
+            bool inParty = playerParty.AddPokemon(wild);
+
+            yield return dialogBox.TypeDialog($"{wild.Base.PokemonName} est capturé!");
+            yield return dialogBox.TypeDialog(inParty
+                ? $"{wild.Base.PokemonName} rejoint votre équipe!"
+                : $"{wild.Base.PokemonName} est envoyé au stockage.");
+
+            OnBattleOver?.Invoke(true);
+        }
+        else
+        {
+            yield return dialogBox.TypeDialog($"Oh non! {wild.Base.PokemonName} s'est libéré!");
+            StartCoroutine(EnemyMove());
+        }
+    }
+
+    bool TryCatch(Pokemon wild)
+    {
+        float hpRatio = (float)wild.HP / wild.MaxHp;
+        float chance = (1f - (2f / 3f) * hpRatio) * (wild.Base.CatchRate / 255f);
+        return UnityEngine.Random.value <= chance;
     }
 
     void HandleMoveSelection()
