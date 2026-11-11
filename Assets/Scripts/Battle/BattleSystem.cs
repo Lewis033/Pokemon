@@ -374,6 +374,8 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator SwitchPokemon(Pokemon newPokemon)
     {
+        dialogBox.EnableActionSelector(false);
+
         bool wasFainted = playerUnit.Pokemon.HP <= 0;
 
         if (playerUnit.Pokemon.HP > 0)
