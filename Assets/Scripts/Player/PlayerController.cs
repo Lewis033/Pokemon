@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed;
     public LayerMask solidObjectsLayer;
     public LayerMask grassLayer;
+    public LayerMask interactableLayer;
 
     public event Action OnEncountered;
 
@@ -16,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
     private bool isMoving;
     private Vector2 input;
+    private Vector2 facingDir = Vector2.down;
 
     private Animator animator;
 
@@ -24,17 +26,13 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     public void HandleUpdate()
     {
         if (!isMoving)
         {
+            if (Input.GetKeyDown(KeyCode.Z))
+                Interact();
+
             input.x = Input.GetAxisRaw("Horizontal");
             input.y = Input.GetAxisRaw("Vertical");
 
@@ -45,6 +43,8 @@ public class PlayerController : MonoBehaviour
 
             if (input != Vector2.zero)
             {
+                facingDir = input;
+
                 animator.SetFloat("moveX", input.x);
                 animator.SetFloat("moveY", input.y);
 
@@ -53,12 +53,20 @@ public class PlayerController : MonoBehaviour
                 targetPos.y += input.y;
 
                 if (IsWalkable(targetPos))
-                    StartCoroutine(Move(targetPos)); 
-
+                    StartCoroutine(Move(targetPos));
             }
         }
 
         animator.SetBool("isMoving", isMoving);
+    }
+
+    private void Interact()
+    {
+        Vector2 target = (Vector2)transform.position + feetOffset + facingDir;
+        Collider2D col = Physics2D.OverlapCircle(target, 0.2f, interactableLayer);
+
+        if (col != null)
+            col.GetComponent<IInteractable>()?.Interact(this);
     }
 
     IEnumerator Move(Vector3 targetPos)
@@ -81,7 +89,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 feetTarget = (Vector2)targetPos + feetOffset;
 
-        if (Physics2D.OverlapCircle(feetTarget, 0.1f, solidObjectsLayer) != null)
+        if (Physics2D.OverlapCircle(feetTarget, 0.1f, solidObjectsLayer | interactableLayer) != null)
         {
             return false;
         }

@@ -38,6 +38,26 @@ public class PokemonParty : MonoBehaviour
             return false;
         }
     }
+
+    public bool DepositPokemon(int partyIndex)
+    {
+        if (Pokemons.Count <= 1) return false;
+
+        Pokemon p = Pokemons[partyIndex];
+        Pokemons.RemoveAt(partyIndex);
+        Storage.Add(p);
+        return true;
+    }
+
+    public bool WithdrawPokemon(int storageIndex)
+    {
+        if (Pokemons.Count >= 6) return false;
+
+        Pokemon p = Storage[storageIndex];
+        Storage.RemoveAt(storageIndex);
+        Pokemons.Add(p);
+        return true;
+    }
 }
 
 [System.Serializable]

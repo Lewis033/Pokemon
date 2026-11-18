@@ -3,7 +3,8 @@ using UnityEngine;
 public enum GameState
 {
     FreeRoam,
-    Battle
+    Battle,
+    PC
 }
 
 public class GameController : MonoBehaviour
@@ -13,6 +14,7 @@ public class GameController : MonoBehaviour
     [SerializeField] Camera worldCamera;
     [SerializeField] PokemonParty playerParty;
     [SerializeField] MapArea mapArea;
+    [SerializeField] PCScreen pcScreen;
 
     GameState state;
 
@@ -20,6 +22,8 @@ public class GameController : MonoBehaviour
     {
         playerController.OnEncountered += StartBattle;
         battleSystem.OnBattleOver += EndBattle;
+        PCTerminal.OnPCOpened += OpenPC;
+        pcScreen.OnClosed += ClosePC;
     }
 
     void StartBattle()
@@ -56,5 +60,29 @@ public class GameController : MonoBehaviour
         {
             battleSystem.HandleUpdate();
         }
+
+        else if (state == GameState.PC)
+        {
+            pcScreen.HandleUpdate();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        playerController.OnEncountered -= StartBattle;
+        battleSystem.OnBattleOver -= EndBattle;
+        PCTerminal.OnPCOpened -= OpenPC;
+        pcScreen.OnClosed -= ClosePC;
+    }
+
+    void OpenPC()
+    {
+        state = GameState.PC;
+        pcScreen.Open(playerParty);
+    }
+
+    void ClosePC()
+    {
+        state = GameState.FreeRoam;
     }
 }
