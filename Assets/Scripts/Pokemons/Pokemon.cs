@@ -10,22 +10,55 @@ public class Pokemon
     public int HP { get; set; }
     public List<Move> Moves { get; set; }
 
+    public int Exp { get; set; }
+
     public Pokemon(PokemonBase pBase, int pLevel)
     {
         Base = pBase;
         Level = pLevel;
+        Exp = Base.GetExpForLevel(Level);
         HP = MaxHp;
 
-        //GENÈRE LES MOVES
         Moves = new List<Move>();
         foreach(LearnableMove move in Base.LearnableMoves)
         {
             if (move.Level <= Level)
                 Moves.Add(new Move(move.Base));
 
-            if (Moves.Count >= 4)
-                break;
+            if (Moves.Count > 4) 
+                Moves.RemoveAt(0);
         }
+    }
+    public bool CheckForLevelUp()
+    {
+        if (Level >= 100)
+            return false;
+
+        if (Exp >= Base.GetExpForLevel(Level + 1))
+        {
+            int oldMaxHp = MaxHp;
+            Level++;
+            HP += MaxHp - oldMaxHp;
+            return true;
+        }
+        return false;
+    }
+
+    public LearnableMove GetLearnableMoveAtCurrLevel()
+    {
+        return Base.LearnableMoves.Find(m => m.Level == Level);
+    }
+
+    public bool KnowsMove(MoveBase moveBase)
+    {
+        return Moves.Exists(m => m.Base == moveBase);
+    }
+
+    public void LearnMove(LearnableMove moveToLearn)
+    {
+        if (Moves.Count >= 4)
+            return;
+        Moves.Add(new Move(moveToLearn.Base));
     }
 
     public int Attack

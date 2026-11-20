@@ -115,8 +115,10 @@ public class BattleSystem : MonoBehaviour
         {
             yield return dialogBox.TypeDialog($"{enemyUnit.Pokemon.Base.PokemonName} est KO.");
             enemyUnit.PlayFaintAnimation();
-
             yield return new WaitForSeconds(2f);
+
+            yield return GainExp(enemyUnit.Pokemon);
+
             OnBattleOver?.Invoke(true);
         }
         else
@@ -395,5 +397,41 @@ public class BattleSystem : MonoBehaviour
             PlayerAction();
         else
             StartCoroutine(EnemyMove());
+    }
+    IEnumerator GainExp(Pokemon faintedPokemon)
+    {
+        Pokemon pokemon = playerUnit.Pokemon;
+        string name = pokemon.Base.PokemonName;
+
+        float trainerBonus = 1f; // 1.5f pour un combat de dresseur
+        int expGain = Mathf.FloorToInt(faintedPokemon.Base.ExpYield * faintedPokemon.Level * trainerBonus / 7f);
+
+        pokemon.Exp += expGain;
+        yield return dialogBox.TypeDialog($"{name} gagne {expGain} points d'expérience!");
+
+        // gère plusieurs niveaux gagnés d'un coup
+        while (pokemon.CheckForLevelUp())
+        {
+            playerHud.SetData(pokemon);
+            yield return dialogBox.TypeDialog($"{name} monte au niveau {pokemon.Level}!");
+
+            LearnableMove newMove = pokemon.GetLearnableMoveAtCurrLevel();
+            if (newMove != null && !pokemon.KnowsMove(newMove.Base))
+            {
+                if (pokemon.Moves.Count < 4)
+                {
+                    pokemon.LearnMove(newMove);
+                    dialogBox.SetMoveNames(pokemon.Moves);
+                    yield return dialogBox.TypeDialog($"{name} apprend {newMove.Base.MoveName}!");
+                }
+                else
+                {
+                    // À remplacer plus tard par un écran "oublier une attaque"
+                    yield return dialogBox.TypeDialog($"{name} veut apprendre {newMove.Base.MoveName}, mais il connaît déjà 4 capacités.");
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(1f);
     }
 }

@@ -27,7 +27,7 @@ public class PartyMemberUI : MonoBehaviour
         }
         else
         {
-            iconImage.enabled = false; // pas d'icône définie : on cache l'Image
+            iconImage.enabled = false;
         }
     }
 

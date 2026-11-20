@@ -27,6 +27,9 @@ public class PokemonBase : ScriptableObject
 
     [SerializeField] List<LearnableMove> learnableMoves;
 
+    [SerializeField] int expYield;
+    [SerializeField] GrowthRate growthRate;
+
     [SerializeField] int catchRate = 255;
 
     public string PokemonName 
@@ -103,6 +106,31 @@ public class PokemonBase : ScriptableObject
     { 
         get { return catchRate; } 
     }
+
+    public int ExpYield
+    {
+        get { return expYield; }
+    }
+    public GrowthRate GrowthRate
+    {
+        get { return growthRate; }
+    }
+
+    public int GetExpForLevel(int level)
+    {
+        int n3 = level * level * level;
+        int xp = 0;
+
+        switch (growthRate)
+        {
+            case GrowthRate.Fast: xp = 4 * n3 / 5; break;
+            case GrowthRate.MediumFast: xp = n3; break;
+            case GrowthRate.MediumSlow: xp = 6 * n3 / 5 - 15 * level * level + 100 * level - 140; break;
+            case GrowthRate.Slow: xp = 5 * n3 / 4; break;
+        }
+
+        return Mathf.Max(0, xp);
+    }
 }
 
 [System.Serializable]
@@ -128,6 +156,7 @@ public class LearnableMove
     }
 }
 
+
 public enum PokemonType
 {
     None,
@@ -147,6 +176,7 @@ public enum PokemonType
     Ghost,
     Dragon
 }
+public enum GrowthRate { Fast, MediumFast, MediumSlow, Slow }
 
 public class TypeChart
 {
